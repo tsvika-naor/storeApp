@@ -1,22 +1,23 @@
 const Order = require('../models/order');
 const Product = require('../models/product')
-exports.getOrders = (req, res, next) =>{
+
+exports.getOrders = (req, res, next) => {
     console.log('i am Order controller')
-    const orderQuery = Order.find();//return all the Orders
-    orderQuery.then(documents =>
-    {
-        console.log(documents)
-        fetchedOrders = documents;
-        return Order.count() // returns all the number of that match query from this database... we made no filtering so we got all 100 Orders
-    }).then(count =>
-    {
-        console.log(count)
-        res.status(200).json({
-            message: 'Orders fetch succesfully!',
-            orders: fetchedOrders,
-            maxOrders: count
+    const orderQuery = Order.find().
+        populate('userId').
+        populate('smartphones')
+        .then(documents => {
+            console.log(documents)
+            fetchedOrders = documents;
+            return Order.count() // returns all the number of that match query from this database... we made no filtering so we got all 100 Orders
+        }).then(count => {
+            console.log(count)
+            res.status(200).json({
+                message: 'Orders fetch succesfully!',
+                orders: fetchedOrders,
+                maxOrders: count
+            })
         })
-    })
 
 }
 // exports.getOrder = (req, res, next) =>
@@ -38,15 +39,14 @@ exports.getOrders = (req, res, next) =>{
 //     });
 // };
 
-exports.createOrder = (req, res, next) =>
-{   console.log(req.body)
+exports.createOrder = (req, res, next) => {
+    console.log(req.body)
     console.log(req.body.smartphones)
     const order = new Order({
         smartphones: req.body.smartphones,
         userId: req.body.userId
     });
-    order.save().then(createdOrder =>
-    {
+    order.save().then(createdOrder => {
         console.log(createdOrder)
         res.status(201).json({
             message: "Order added successfully",
@@ -57,8 +57,7 @@ exports.createOrder = (req, res, next) =>
             }
         });
     })
-        .catch(error =>
-        {
+        .catch(error => {
             res.status(500).json({
                 message: 'Creating a Order failed!'
             });
